@@ -1,6 +1,8 @@
 package com.redrackham.client
 
+import android.util.Log
 import com.redrackham.*
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * LSerialPortSyncClient 串口同步读写客户端
@@ -26,37 +28,58 @@ class LSerialPortSyncClient private constructor(
         private const val DEF_READ_TIME_OUT = -1
     }
 
+
+    private val device_ptr_atm: AtomicLong = AtomicLong(-1L)
+
     /**
      * 打开串口
      */
-    override fun open(): Int = LSerialPortJNI.native_openSerialPortSync(
-        path, baudrate, dataBits, parity, stopBits, readTimeoutMills
-    )
+    override fun open(): Int {
+        val devicePtr = LSerialPortJNI.native_openSyncSerialPort(
+            path,
+            baudrate,
+            dataBits,
+            parity,
+            stopBits,
+            readTimeoutMills
+        )
+        if (devicePtr != -1L) {//创建成功 拿到底层对象指针
+            this.device_ptr_atm.set(devicePtr)
+            return 0
+        } else {
+            return -1
+        }
+    }
 
-    /**
-     * 关闭串口
-     */
-    override fun close(): Int = LSerialPortJNI.native_closeSerialPort(path)
 
     /**
      * 串口是否打开
      */
     override fun hasOpen(): Boolean = LSerialPortJNI.native_hasOpen(path)
 
+
+    /**
+     * 关闭串口
+     */
+    override fun close(): Int = LSerialPortJNI.native_closeSyncSerialPort(path)
+
+
     /**
      * 是否有接收到串口数据
      */
-    fun dataAvailable(): Boolean = LSerialPortJNI.native_syncDataAvailable(path)
+    fun dataAvailable(): Boolean =
+        LSerialPortJNI.native_syncDataAvailable(this.device_ptr_atm.get())
+
 
     /**
      * 读数据
      */
-    fun read(): ByteArray = LSerialPortJNI.native_syncRead(path)
+    fun read(): ByteArray = LSerialPortJNI.native_syncRead(this.device_ptr_atm.get())
 
     /**
      * 写数据
      */
-    fun write(data: ByteArray?) = LSerialPortJNI.native_syncWrite(path, data)
+    fun write(data: ByteArray?) = LSerialPortJNI.native_syncWrite(this.device_ptr_atm.get(), data)
 
     class Builder constructor(val path: String) {
         private var baudrate: Int = DEF_BAUDRATE

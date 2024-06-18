@@ -28,8 +28,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 }
 
 extern "C"
-JNIEXPORT jint JNICALL
-Java_com_redrackham_LSerialPortJNI_native_1openSerialPortSync(JNIEnv *env, jobject thiz,
+JNIEXPORT jlong JNICALL
+Java_com_redrackham_LSerialPortJNI_native_1openSyncSerialPort(JNIEnv *env, jobject thiz,
                                                               jstring path, jint baudrate,
                                                               jint data_bits, jint parity,
                                                               jint stop_bits,
@@ -42,10 +42,11 @@ Java_com_redrackham_LSerialPortJNI_native_1openSerialPortSync(JNIEnv *env, jobje
     NumStopBits sb = convertStopBits(stop_bits);
     //jint转int32_t
     auto rtm_32 = static_cast<int32_t>(read_timeout_mills);
-    int result = mLSerialPortManager->addSyncReadWriteDevice(path_str, br, db, p, sb, rtm_32);
+    long worker_ptr_jlong = mLSerialPortManager->buildSyncReadWriteDevice(path_str, br, db, p, sb,
+                                                                          rtm_32);
     //释放资源
     env->ReleaseStringUTFChars(path, path_char);
-    return result;
+    return worker_ptr_jlong;
 }
 
 extern "C"
@@ -180,69 +181,85 @@ Java_com_redrackham_LSerialPortJNI_native_1hasOpen(JNIEnv *env, jobject thiz, js
 
 
 
-
-
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_redrackham_LSerialPortJNI_native_1syncWrite(JNIEnv *env, jobject thiz, jstring path,
+Java_com_redrackham_LSerialPortJNI_native_1syncWrite(JNIEnv *env, jobject thiz,
+                                                     jlong device_ptr_long,
                                                      jbyteArray data) {
-    if (data == nullptr) {
-        return;
+    SyncReadWriteWorker *worker = reinterpret_cast<SyncReadWriteWorker *>(device_ptr_long);
+    if (worker != nullptr) {
+        std::vector<uint8_t> msg_vec = convertJByteArrayToVectorU8(env, data);
+        worker->doWork(msg_vec);
     }
-    const char *path_char = env->GetStringUTFChars(path, nullptr);
-    std::vector<uint8_t> msg_vec = convertJByteArrayToVectorU8(env, data);
-    mLSerialPortManager->writeMessageSync(path_char, msg_vec);
-    //释放资源
-    env->ReleaseStringUTFChars(path, path_char);
 }
 
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_redrackham_LSerialPortJNI_native_1syncRead(JNIEnv *env, jobject thiz, jstring path) {
-    const char *path_char = env->GetStringUTFChars(path, nullptr);
-
-    auto msg_vec = mLSerialPortManager->readMessageSync(path_char);
-
-    auto size = static_cast<uint32_t>(msg_vec.size());
+Java_com_redrackham_LSerialPortJNI_native_1syncRead(JNIEnv *env, jobject thiz,
+                                                    jlong device_ptr_long) {
+    SyncReadWriteWorker *worker = reinterpret_cast<SyncReadWriteWorker *>(device_ptr_long);
     jbyteArray jData;
-    if (size > static_cast<uint32_t>(std::numeric_limits<jsize>::max())) {
-        LOGE("data size is too big, splitting data into chunks!");
-        // 数据过大，需要分段拷贝
-        constexpr uint32_t chunkSize = std::numeric_limits<jsize>::max();
-        jData = env->NewByteArray(chunkSize);
-        uint32_t offset = 0;
-        while (offset < size) {
-            const uint32_t copySize = std::min(size - offset, chunkSize);
-            // 创建临时的 jbyteArray 用于存储当前分段的数据
-            jbyteArray tempData = env->NewByteArray(static_cast<jsize>(copySize));
-            env->SetByteArrayRegion(tempData, 0, static_cast<jsize>(copySize),
-                                    reinterpret_cast<const jbyte *>(msg_vec.data() + offset));
-            // 将当前分段的数据拷贝到最终的 jData 中
-            env->SetByteArrayRegion(jData, 0, static_cast<jsize>(copySize),
-                                    reinterpret_cast<const jbyte *>(msg_vec.data() + offset));
-            offset += copySize;
-            // 释放临时的 jbyteArray
-            env->DeleteLocalRef(tempData);
+    if (worker != nullptr) {
+        auto msg_vec = worker->read();
+        auto size = static_cast<uint32_t>(msg_vec.size());
+        if (size > static_cast<uint32_t>(std::numeric_limits<jsize>::max())) {
+            LOGE("data size is too big, splitting data into chunks!");
+            // 数据过大，需要分段拷贝
+            constexpr uint32_t chunkSize = std::numeric_limits<jsize>::max();
+            jData = env->NewByteArray(chunkSize);
+            uint32_t offset = 0;
+            while (offset < size) {
+                const uint32_t copySize = std::min(size - offset, chunkSize);
+                // 创建临时的 jbyteArray 用于存储当前分段的数据
+                jbyteArray tempData = env->NewByteArray(static_cast<jsize>(copySize));
+                env->SetByteArrayRegion(tempData, 0, static_cast<jsize>(copySize),
+                                        reinterpret_cast<const jbyte *>(msg_vec.data() + offset));
+                // 将当前分段的数据拷贝到最终的 jData 中
+                env->SetByteArrayRegion(jData, 0, static_cast<jsize>(copySize),
+                                        reinterpret_cast<const jbyte *>(msg_vec.data() + offset));
+                offset += copySize;
+                // 释放临时的 jbyteArray
+                env->DeleteLocalRef(tempData);
+            }
+        } else {
+            jData = env->NewByteArray(static_cast<jsize>(size));
+            env->SetByteArrayRegion(jData, 0, static_cast<jsize>(size),
+                                    reinterpret_cast<const jbyte *>(msg_vec.data()));
         }
     } else {
-        jData = env->NewByteArray(static_cast<jsize>(size));
-        env->SetByteArrayRegion(jData, 0, static_cast<jsize>(size),
-                                reinterpret_cast<const jbyte *>(msg_vec.data()));
+        jData = env->NewByteArray(0);
     }
-    // 释放资源
-    env->ReleaseStringUTFChars(path, path_char);
     return jData;
 }
+
+
+
 
 
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_redrackham_LSerialPortJNI_native_1syncDataAvailable(JNIEnv *env, jobject thiz,
-                                                             jstring path) {
+                                                             jlong device_ptr_long) {
+    SyncReadWriteWorker *worker = reinterpret_cast<SyncReadWriteWorker *>(device_ptr_long);
+    if (worker != nullptr) {
+        return worker->dataAvailable();
+    } else {
+        return false;
+    }
+}
+
+
+
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_redrackham_LSerialPortJNI_native_1closeSyncSerialPort(JNIEnv *env, jobject thiz,
+                                                               jstring path) {
+
     const char *path_char = env->GetStringUTFChars(path, nullptr);
     auto path_str = std::string(path_char);
-    bool result = mLSerialPortManager->dataAvailableSync(path_str);
-    // 释放资源
+    int result = mLSerialPortManager->removeDevice(path_str);
+    //释放资源
     env->ReleaseStringUTFChars(path, path_char);
     return result;
 }

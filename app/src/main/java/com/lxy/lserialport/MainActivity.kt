@@ -186,6 +186,7 @@ class MainActivity : AppCompatActivity() {
                 val msgStr = binding.edtMsg.text.toString().trim()
                 val msgHex = msgStr.hexToByteArray()
                 lSerialPortClient?.sendMsg(msgHex)
+                showLogOnMain("发 >>> $msgStr")
             }
         }
 
@@ -208,7 +209,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showLogOnMain(msg: String?) {
-        Log.e("lxyTest", "$msg")
+        Log.e("LSerialPort", "$msg")
         if (msg == null) {
             runOnUiThread { binding.tvLog.text = "" }
         } else {

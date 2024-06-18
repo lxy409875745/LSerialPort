@@ -12,6 +12,56 @@ namespace LSerialPort {
 
     LSerialPortManager::LSerialPortManager() = default;
 
+
+    jlong LSerialPortManager::buildSyncReadWriteDevice(std::string &path,
+                                                       mn::CppLinuxSerial::BaudRate &baudRate,
+                                                       mn::CppLinuxSerial::NumDataBits &dataBits,
+                                                       mn::CppLinuxSerial::Parity &parity,
+                                                       mn::CppLinuxSerial::NumStopBits &stopBits,
+                                                       int32_t &readTimeoutMills) {
+
+        //检查串口是否存在
+        if (hasDevice(path)) {
+            char ch[20];
+            char *path_char = strcpy(ch, path.c_str());
+            LOGE("serial port [%s] has been opened, please do not open the serial port repeatedly",
+                 path_char);
+            return -1;
+        }
+        //串口读取数据超时范围
+        if (readTimeoutMills < -1) {
+            THROW_EXCEPT("read timeout mills  was < -1, which is invalid.")
+        }
+
+        //串口读取数据超时范围
+        if (readTimeoutMills > 25500) {
+            THROW_EXCEPT("read timeout mills  was > 25500, which is invalid.")
+        }
+        // worker_ptr 是占有 ReadWorker 的 unique_ptr
+        std::unique_ptr<SyncReadWriteWorker> worker_ptr = std::make_unique<SyncReadWriteWorker>(
+                path,
+                baudRate,
+                dataBits,
+                parity,
+                stopBits,
+                readTimeoutMills);
+
+
+        if (worker_ptr->isOpened()) {
+
+            // 作为指向基类的指针
+            long worker_ptr_jlong = reinterpret_cast<jlong>(worker_ptr.get());
+            _mDevices[path] = std::move(worker_ptr);
+            return worker_ptr_jlong;
+        } else {
+            char ch[20];
+            char *path_char = strcpy(ch, path.c_str());
+            LOGE("open serial port [%s] fail！", path_char);
+            return -1;
+        }
+    }
+
+
     int LSerialPortManager::addSyncReadWriteDevice(std::string &path, BaudRate &baudRate,
                                                    NumDataBits &dataBits, Parity &parity,
                                                    NumStopBits &stopBits,
@@ -80,7 +130,7 @@ namespace LSerialPort {
 
         //检查串口是否有数据轮循超时时间
         if (checkIntervalWaitMills < 0) {
-            THROW_EXCEPT("check timeout mills must be greater than or equal to 0!");
+            THROW_EXCEPT("check timeout mills must be greater than or equal to 0!")
         }
 
         // worker_ptr 是占有 ReadWorker 的 unique_ptr
@@ -262,65 +312,6 @@ namespace LSerialPort {
         } else {
             THROW_EXCEPT(
                     "failed to set listener, please open serial port [\"" + path + "\"] first")
-        }
-    }
-
-    std::vector<uint8_t>
-    LSerialPortManager::readMessageSync(const std::string &path) {
-        if (hasDevice(path)) {
-            IWorker *worker = _mDevices[path].get();
-            //尝试动态转换为ReadWriteWorker
-            auto *syncRWWroker = dynamic_cast<SyncReadWriteWorker *>(worker);
-            if (syncRWWroker != nullptr) {
-                return syncRWWroker->read();
-            } else {
-                THROW_EXCEPT(
-                        "unable to read messages by synchronous thread, because the serial port \"" +
-                        path +
-                        "\". is currently being read and written by asynchronous thread.please use the [addSyncReadWriteDevice] function to open the serial port");
-            }
-        } else {
-            THROW_EXCEPT(
-                    "failed to read message, please open serial port [\"" + path + "\"] first")
-        }
-    }
-
-    void LSerialPortManager::writeMessageSync(const std::string &path,
-                                              const std::vector<uint8_t> &msg) {
-        if (hasDevice(path)) {
-            IWorker *worker = _mDevices[path].get();
-            //尝试动态转换为ReadWriteWorker
-            auto *syncRWWroker = dynamic_cast<SyncReadWriteWorker *>(worker);
-            if (syncRWWroker != nullptr) {
-                syncRWWroker->doWork(msg);
-            } else {
-                THROW_EXCEPT(
-                        "unable to send messages by synchronous thread, because the serial port [\"" +
-                        path +
-                        "\"]. is currently being read and written by asynchronous thread.please use the [addSyncReadWriteDevice] function to open the serial port");
-            }
-        } else {
-            THROW_EXCEPT(
-                    "failed to check data available, please open serial port [\"" + path +
-                    "\"] first")
-        }
-    }
-
-    bool LSerialPortManager::dataAvailableSync(const std::string &path) {
-        if (hasDevice(path)) {
-            IWorker *worker = _mDevices[path].get();
-            //尝试动态转换为ReadWriteWorker
-            auto *syncRWWroker = dynamic_cast<SyncReadWriteWorker *>(worker);
-            if (syncRWWroker != nullptr) {
-                return syncRWWroker->dataAvailable();
-            } else {
-                THROW_EXCEPT(
-                        "unable to check data available, because the serial port is currently being read and written by asynchronous thread.please use the [addSyncReadWriteDevice] function to open the serial port");
-            }
-        } else {
-            THROW_EXCEPT(
-                    "failed to check data available, please open serial port [\"" + path +
-                    "\"] first")
         }
     }
 
