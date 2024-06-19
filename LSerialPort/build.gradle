@@ -22,6 +22,7 @@ android {
     defaultConfig {
         minSdk 23
         targetSdk 34
+        versionName(mVersionName)
         consumerProguardFiles "consumer-rules.pro"
         ndk {
             //串口默认"armeabi", "armeabi-v7a"
@@ -35,7 +36,7 @@ android {
             }
         }
     }
-    libraryVariants.all { variant ->
+    libraryVariants.configureEach { variant ->
         variant.outputs.all {
             outputFileName = "LSerialPort-${defaultConfig.versionName}-${variant.name}.aar"
         }
@@ -204,7 +205,7 @@ signing {
 }
 
 //添加源码打包
-task androidSourcesJar(type: Jar) {
+tasks.register('androidSourcesJar', Jar) {
     String sourcesType = "sources"
     archiveClassifier.convention(sourcesType)
     archiveClassifier.set(sourcesType)
