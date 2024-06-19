@@ -108,9 +108,9 @@ if(result == 0){
 
 <br><br>
 
-## 非异步操作串口
+## 同步操作串口
 
-LSerialPort同时也提供了非异步操作串口的类[LSerialPortSyncClient](https://github.com/RedRackham-R/LSerialPort/blob/v2/LSerialPort/src/main/java/com/redrackham/client/LSerialPortSyncClient.kt)，给想要自己控制串口读写线程的同学。下面是一些简单调用说明。<br>
+LSerialPort同时也提供了同步操作串口的类[LSerialPortSyncClient](https://github.com/RedRackham-R/LSerialPort/blob/v2/LSerialPort/src/main/java/com/redrackham/client/LSerialPortSyncClient.kt)，给想要自己控制串口读写线程的同学。下面是一些简单调用说明。<br>
 
 具体使用可以查看 [**>参考代码<**](https://github.com/RedRackham-R/LSerialPort/blob/v2/app/src/main/java/com/lxy/lserialport/guide/LSerialPortSyncClientExample.kt) <br><br>
 
