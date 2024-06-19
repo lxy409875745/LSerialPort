@@ -3,7 +3,7 @@
 *   \[项目地址] <https://github.com/RedRackham-R/LSerialPort>)
 
 该库采用C++实现异步线程读写串口。上层使用无需过多关心异步线程读写问题。<br><br>
-同时也支持非异步读写串口。<br>
+同时也支持同步阻塞式读写串口。<br>
 
 <img width="480" alt="12e2d4e30b495362d7ffaf3a1b63719" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8962cb0e03b74b6da38d743405cdd77d~tplv-k3u1fbpfcp-watermark.image?">
 <br>
