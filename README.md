@@ -22,7 +22,7 @@
 ```kotlin
 dependencies {
     ...
-    implementation("io.github.RedRackham-R:LSerialPort:2.0.2")
+    implementation("io.github.RedRackham-R:LSerialPort:2.0.3-beta")
 }
 ```
 
