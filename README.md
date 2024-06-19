@@ -9,7 +9,7 @@
 <br>
 
 [下载demo](https://github.com/RedRackham-R/LSerialPort/releases)
-（平台：arm64-v8a、armeabi-v7a）
+（平台：arm64-v8a、armeabi-v7a、x86_64）
 
 # 框架引入
 
