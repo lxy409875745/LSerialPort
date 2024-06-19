@@ -89,6 +89,8 @@ var signingPassword = ""//签名设置的密码
 var secretKeyRingFile = ""//生成的secring.gpg文件目录
 var ossrhUsername = ""//sonatype用户名
 var ossrhPassword = "" //sonatype密码
+var ossrhTokenUserName = ""//sonatype token 用户名 （替换原sonatype用户名）
+var ossrhTokenPassword = ""//sonatype token 密码 （替换原sonatype密码）
 var PUBLISH_NAME = ""//推送用户名
 var PUBLISH_GROUP_ID = ""//groupid
 var PUBLISH_EMAIL = ""//email
@@ -103,6 +105,8 @@ if (localProperties.exists()) {
     secretKeyRingFile = properties.getProperty("signing.secretKeyRingFile")
     ossrhUsername = properties.getProperty("ossrhUsername")
     ossrhPassword = properties.getProperty("ossrhPassword")
+    ossrhTokenUserName = properties.getProperty("ossrhTokenUserName")
+    ossrhTokenPassword = properties.getProperty("ossrhTokenPassword")
     PUBLISH_NAME = properties.getProperty("PUBLISH_NAME")
     PUBLISH_GROUP_ID = properties.getProperty("PUBLISH_GROUP_ID")
     PUBLISH_EMAIL = properties.getProperty("PUBLISH_EMAIL")
@@ -180,9 +184,10 @@ afterEvaluate {
                 url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
                 credentials {
                     //你的sonatype账号
-                    username = ossrhUsername
+                    username = ossrhTokenUserName
                     //你的sonatype密码
-                    password = ossrhPassword
+                    password = ossrhTokenPassword
+
                 }
             }
         }
