@@ -3,7 +3,9 @@ package com.lxy.lserialport.guide
 import android.util.Log
 import com.redrackham.BaudRate
 import com.redrackham.DataBits
+import com.redrackham.HardwareFlowControl
 import com.redrackham.Parity
+import com.redrackham.SoftwareFlowControl
 import com.redrackham.StopBits
 import com.redrackham.client.LSerialPortClient
 
@@ -19,9 +21,12 @@ class LSerialPortClientExample {
         //创建clientBuilder，该client操作串口：ttysWK0。通过建造者我们可以选择定制参数
         val clientBuilder = LSerialPortClient.Builder("/dev/ttysWK0")
             .baudrate(BaudRate.B_115200)//波特率
+//          .baudrate_custom(9600)//自定义波特率
             .dataBits(DataBits.EIGHT)//数据位
             .parity(Parity.NONE)//校验位
             .stopBits(StopBits.ONE)//停止位
+            .hardwareFlowControl(HardwareFlowControl.OFF)//硬件流控 (RTS/CTS) 默认关闭
+            .softwareFlowControl(SoftwareFlowControl.OFF)//软件流控 (XON/XOF) 默认关闭
             .checkIntervalWaitMills(0)//轮循检查串口等待时间，等待时间越长一次返回的数据就越大，单位:ms
 
         //创建串口操作client

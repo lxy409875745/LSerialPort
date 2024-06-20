@@ -6,30 +6,18 @@ object LSerialPortJNI {
         System.loadLibrary("lserialport")
     }
 
+    //---------异步模块相关api--------------
     external fun native_openSerialPort(
         path: String,
         baudrate: Int,
         dataBits: Int,
         parity: Int,
         stopBits: Int,
+        hardwareFlowControl: Int,
+        softwareFlowControl: Int,
         checkIntervalWaitMills: Int
     ): Int
 
-    external fun native_hasOpen(path: String): Boolean
-    external fun native_sendMsg(path: String, msg: ByteArray?)
-
-    external fun native_setLSerialPortDataListener(
-        path: String, listener: LSerialPortDataListener
-    )
-
-
-    external fun native_openSerialPortWriteOnly(
-        path: String,
-        baudrate: Int,
-        dataBits: Int,
-        parity: Int,
-        stopBits: Int,
-    ): Int
 
     external fun native_openSerialPortReadOnly(
         path: String,
@@ -37,8 +25,28 @@ object LSerialPortJNI {
         dataBits: Int,
         parity: Int,
         stopBits: Int,
+        hardwareFlowControl: Int,
+        softwareFlowControl: Int,
         checkIntervalWaitMills: Int
     ): Int
+
+    external fun native_openSerialPortWriteOnly(
+        path: String,
+        baudrate: Int,
+        dataBits: Int,
+        parity: Int,
+        stopBits: Int,
+        hardwareFlowControl: Int,
+        softwareFlowControl: Int,
+    ): Int
+
+
+    external fun native_hasOpen(path: String): Boolean
+    external fun native_sendMsg(path: String, msg: ByteArray?)
+
+    external fun native_setLSerialPortDataListener(
+        path: String, listener: LSerialPortDataListener
+    )
 
     external fun native_closeSerialPort(
         path: String,
@@ -52,6 +60,8 @@ object LSerialPortJNI {
         dataBits: Int,
         parity: Int,
         stopBits: Int,
+        hardwareFlowControl: Int,
+        softwareFlowControl: Int,
         readTimeoutMills: Int
     ): Long
 

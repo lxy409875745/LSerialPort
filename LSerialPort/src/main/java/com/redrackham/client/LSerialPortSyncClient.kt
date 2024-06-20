@@ -19,9 +19,21 @@ class LSerialPortSyncClient private constructor(
     override val parity: Int,
     //停止位
     override val stopBits: Int,
+    //硬件流控
+    override val hardwareFlowControl: Int,
+    //软件流控
+    override val softwareFlowControl: Int,
     //读取数据超时时间 -1:一直等待    0:无论有没有数据立即返回    x>0:等待多少x毫秒   默认是一直等待
     val readTimeoutMills: Int
-) : BaseSerialPortClient(path, baudrate, dataBits, parity, stopBits) {
+) : BaseSerialPortClient(
+    path,
+    baudrate,
+    dataBits,
+    parity,
+    stopBits,
+    hardwareFlowControl,
+    softwareFlowControl
+) {
 
     companion object {
         //默认一直等待
@@ -41,6 +53,8 @@ class LSerialPortSyncClient private constructor(
             dataBits,
             parity,
             stopBits,
+            hardwareFlowControl,
+            softwareFlowControl,
             readTimeoutMills
         )
         if (devicePtr != -1L) {//创建成功 拿到底层对象指针
@@ -86,17 +100,33 @@ class LSerialPortSyncClient private constructor(
         private var dataBits: Int = DEF_DATABITS
         private var parity: Int = DEF_PARITY
         private var stopBits: Int = DEF_STOPBITS
+        private var hardwareFlowControl: Int = DEF_HARDWARE_FLOW_CONTROL
+        private var softwareFlowControl: Int = DEF_SOFTWARE_FLOW_CONTROL
         private var readTimeoutMills: Int = DEF_READ_TIME_OUT
 
         fun baudrate(@BaudRate baudrate: Int) = apply { this.baudrate = baudrate }
+        fun baudrate_custom(baudrate: Int) = apply { this.baudrate = baudrate }
         fun dataBits(@DataBits dataBits: Int) = apply { this.dataBits = dataBits }
         fun parity(@Parity parity: Int) = apply { this.parity = parity }
         fun stopBits(@StopBits stopBits: Int) = apply { this.stopBits = stopBits }
+        fun hardwareFlowControl(@HardwareFlowControl hardwareFlowControl: Int) =
+            apply { this.hardwareFlowControl = hardwareFlowControl }
+
+        fun softwareFlowControl(@SoftwareFlowControl softwareFlowControl: Int) =
+            apply { this.softwareFlowControl = softwareFlowControl }
+
         fun readTimeoutMills(readTimeoutMills: Int) =
             apply { this.readTimeoutMills = readTimeoutMills }
 
         fun build() = LSerialPortSyncClient(
-            path, baudrate, dataBits, parity, stopBits, readTimeoutMills
+            path = path,
+            baudrate = baudrate,
+            dataBits = dataBits,
+            parity = parity,
+            stopBits = stopBits,
+            hardwareFlowControl = hardwareFlowControl,
+            softwareFlowControl = softwareFlowControl,
+            readTimeoutMills = readTimeoutMills
         )
     }
 }

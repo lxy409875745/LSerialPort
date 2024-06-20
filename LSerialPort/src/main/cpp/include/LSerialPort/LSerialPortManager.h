@@ -34,10 +34,12 @@ namespace LSerialPort {
          */
         int addDevice(
                 std::string &path,
-                BaudRate &baudRate,
+                int &baudRate,
                 NumDataBits &dataBits,
                 Parity &parity,
                 NumStopBits &stopBits,
+                HardwareFlowControl &hwfc,
+                SoftwareFlowControl &swfc,
                 int32_t &readIntervalTimeoutMills,
                 long &checkIntervalWaitMills);
 
@@ -53,10 +55,12 @@ namespace LSerialPort {
          */
         int addWriteOnlyDevice(
                 std::string &path,
-                BaudRate &baudRate,
+                int &baudRate,
                 NumDataBits &dataBits,
                 Parity &parity,
                 NumStopBits &stopBits,
+                HardwareFlowControl &hwfc,
+                SoftwareFlowControl &swfc,
                 int32_t &readIntervalTimeoutMills
         );
 
@@ -73,32 +77,16 @@ namespace LSerialPort {
          */
         int addReadOnlyDevice(
                 std::string &path,
-                BaudRate &baudRate,
+                int &baudRate,
                 NumDataBits &dataBits,
                 Parity &parity,
                 NumStopBits &stopBits,
+                HardwareFlowControl &hwfc,
+                SoftwareFlowControl &swfc,
                 int32_t &readIntervalTimeoutMills,
                 long &checkIntervalWaitMills);
 
 
-        /**
-         * 添加同步设备
-         * @param path 串口地址
-         * @param baudRate 波特率
-         * @param dataBits 数据位
-         * @param parity 校验位
-         * @param stopBits 停止位
-         * @param readTimeoutMills 读数据等待时间 -1表示无限超时等待 直到有数据返回，0标识表示立即返回任何数据，>0则等待x毫秒后会取消阻塞
-         * @return
-         */
-        int addSyncReadWriteDevice(
-                std::string &path,
-                BaudRate &baudRate,
-                NumDataBits &dataBits,
-                Parity &parity,
-                NumStopBits &stopBits,
-                int32_t &readTimeoutMills
-        );
 
 
         /**
@@ -113,10 +101,12 @@ namespace LSerialPort {
          */
         jlong buildSyncReadWriteDevice(
                 std::string &path,
-                BaudRate &baudRate,
+                int &baudRate,
                 NumDataBits &dataBits,
                 Parity &parity,
                 NumStopBits &stopBits,
+                HardwareFlowControl &hwfc,
+                SoftwareFlowControl &swfc,
                 int32_t &readTimeoutMills
         );
 

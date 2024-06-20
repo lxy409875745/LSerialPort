@@ -111,66 +111,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //打开串口
-        binding.btnOpen.run {
-            setOnClickListener {
-                //串口地址
-                val path = binding.spPath.selectedItem as String
-                //波特率
-                val baudrate = binding.spBaudrate.selectedItem as Int
-                //数据位
-                val dataBits = binding.spDatabits.selectedItem as Int
-                //校验位
-                val parity = when (binding.spParity.selectedItem) {
-                    "NONE" -> Parity.NONE
-                    "EVEN" -> Parity.EVEN
-                    "ODD" -> Parity.ODD
-                    else -> Parity.NONE
-                }
-                //停止位
-                val stopBits = binding.spStopbits.selectedItem as Int
-
-                //这里判断下 避免创建多个client对象 底层其实还是调用一个对象的函数，不推荐多个对象同时操作同一个串口，。
-                if (lSerialPortClient?.hasOpen() == true) {
-                    showLogOnMain("打开串口失败，请先关闭当前运行串口【${lSerialPortClient!!.path}】!!!")
-                    return@setOnClickListener
-                }
-
-                lSerialPortClient = LSerialPortClient.Builder(path)
-                    .baudrate(baudrate)
-                    .dataBits(dataBits)
-                    .parity(parity)
-                    .stopBits(stopBits)
-                    .build()
-                //打开串口
-                val result = lSerialPortClient?.open()
-                if (result == 0) {
-                    setUIClickbale(false)
-                    showLogOnMain("打开串口${path}成功")
-                    showLogOnMain("Baudrate:${baudrate}   DataBits:$dataBits   Parity:${binding.spParity.selectedItem}   StopBits:$stopBits")
-                    //打开成功设置监听器
-                    lSerialPortClient!!.setListener { msg ->
-                        showLogOnMain("收 <<< ${msg.toHexString()}")
-                    }
+        binding.switchSerialPort.run {
+            setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    openSerialPort()
                 } else {
-                    showLogOnMain("打开串口${path}失败！")
+                    closeSerialPort()
                 }
             }
         }
-        //关闭串口
-        binding.btnClose.run {
-            setOnClickListener {
-                //串口地址
-                val path = binding.spPath.selectedItem as String
-                val result = lSerialPortClient?.close()
-                if (result == 0) {
-                    setUIClickbale(true)
-                    showLogOnMain("关闭串口${path} 成功！")
-                } else {
-                    showLogOnMain("关闭串口${path} 失败！")
-                }
-            }
-        }
+
 
         binding.btnCleanLog.run {
             setOnClickListener {
@@ -196,12 +146,81 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    private fun openSerialPort() {
+        //串口地址
+        val path = binding.spPath.selectedItem as String
+        //波特率
+        val baudrate = binding.spBaudrate.selectedItem as Int
+        //数据位
+        val dataBits = binding.spDatabits.selectedItem as Int
+        //校验位
+        val parity = when (binding.spParity.selectedItem) {
+            "NONE" -> Parity.NONE
+            "EVEN" -> Parity.EVEN
+            "ODD" -> Parity.ODD
+            else -> Parity.NONE
+        }
+        //停止位
+        val stopBits = binding.spStopbits.selectedItem as Int
+
+        //硬件流控
+        val hardwareFlowControl =
+            if (binding.cbHwFlowControl.isChecked) HardwareFlowControl.ON else HardwareFlowControl.OFF
+
+        //软件流控
+        val softwareFlowControl =
+            if (binding.cbSwFlowControl.isChecked) SoftwareFlowControl.ON else SoftwareFlowControl.OFF
+
+        //这里判断下 避免创建多个client对象 底层其实还是调用一个对象的函数，不推荐多个对象同时操作同一个串口，。
+        if (lSerialPortClient?.hasOpen() == true) {
+            showLogOnMain("打开串口失败，请先关闭当前运行串口【${lSerialPortClient!!.path}】!!!")
+            return
+        }
+
+        lSerialPortClient = LSerialPortClient.Builder(path)
+            .baudrate(baudrate)
+//                    .baudrate_custom(9600) //可以自定义波特率
+            .dataBits(dataBits)
+            .parity(parity)
+            .stopBits(stopBits)
+            .hardwareFlowControl(hardwareFlowControl)
+            .softwareFlowControl(softwareFlowControl)
+            .build()
+        //打开串口
+        val result = lSerialPortClient?.open()
+        if (result == 0) {
+            setUIClickbale(false)
+            showLogOnMain("打开串口${path}成功")
+            showLogOnMain("Baudrate:${baudrate}   DataBits:$dataBits   Parity:${binding.spParity.selectedItem}   StopBits:$stopBits    hardwareFlowControl:${binding.cbHwFlowControl.isChecked}    softwareFlowControl:${binding.cbSwFlowControl.isChecked}")
+            //打开成功设置监听器
+            lSerialPortClient!!.setListener { msg ->
+                showLogOnMain("收 <<< ${msg.toHexString()}")
+            }
+        } else {
+            showLogOnMain("打开串口${path}失败！")
+        }
+    }
+
+    private fun closeSerialPort() {
+        //串口地址
+        val path = binding.spPath.selectedItem as String
+        val result = lSerialPortClient?.close()
+        if (result == 0) {
+            setUIClickbale(true)
+            showLogOnMain("关闭串口${path} 成功！")
+        } else {
+            showLogOnMain("关闭串口${path} 失败！")
+        }
+    }
+
     private fun setUIClickbale(clickable: Boolean) {
         binding.spPath.isEnabled = clickable
         binding.spBaudrate.isEnabled = clickable
         binding.spDatabits.isEnabled = clickable
         binding.spParity.isEnabled = clickable
         binding.spStopbits.isEnabled = clickable
+        binding.cbHwFlowControl.isEnabled = clickable
+        binding.cbSwFlowControl.isEnabled = clickable
         //反向设置点击
         binding.btnSendMsg.isEnabled = !clickable
         binding.edtMsg.isEnabled = !clickable

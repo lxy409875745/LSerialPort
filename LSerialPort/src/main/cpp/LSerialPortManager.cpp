@@ -14,10 +14,12 @@ namespace LSerialPort {
 
 
     jlong LSerialPortManager::buildSyncReadWriteDevice(std::string &path,
-                                                       mn::CppLinuxSerial::BaudRate &baudRate,
-                                                       mn::CppLinuxSerial::NumDataBits &dataBits,
-                                                       mn::CppLinuxSerial::Parity &parity,
-                                                       mn::CppLinuxSerial::NumStopBits &stopBits,
+                                                       int &baudRate,
+                                                       NumDataBits &dataBits,
+                                                       Parity &parity,
+                                                       NumStopBits &stopBits,
+                                                       HardwareFlowControl &hwfc,
+                                                       SoftwareFlowControl &swfc,
                                                        int32_t &readTimeoutMills) {
 
         //检查串口是否存在
@@ -44,6 +46,8 @@ namespace LSerialPort {
                 dataBits,
                 parity,
                 stopBits,
+                hwfc,
+                swfc,
                 readTimeoutMills);
 
 
@@ -62,52 +66,11 @@ namespace LSerialPort {
     }
 
 
-    int LSerialPortManager::addSyncReadWriteDevice(std::string &path, BaudRate &baudRate,
-                                                   NumDataBits &dataBits, Parity &parity,
-                                                   NumStopBits &stopBits,
-                                                   int32_t &readTimeoutMills) {
-        //检查串口是否存在
-        if (hasDevice(path)) {
-            char ch[20];
-            char *path_char = strcpy(ch, path.c_str());
-            LOGE("serial port [%s] has been opened, please do not open the serial port repeatedly",
-                 path_char);
-            return -1;
-        }
-        //串口读取数据超时范围
-        if (readTimeoutMills < -1) {
-            THROW_EXCEPT("read timeout mills  was < -1, which is invalid.")
-        }
-
-        //串口读取数据超时范围
-        if (readTimeoutMills > 25500) {
-            THROW_EXCEPT("read timeout mills  was > 25500, which is invalid.")
-        }
-        // worker_ptr 是占有 ReadWorker 的 unique_ptr
-        std::unique_ptr<SyncReadWriteWorker> worker_ptr = std::make_unique<SyncReadWriteWorker>(
-                path,
-                baudRate,
-                dataBits,
-                parity,
-                stopBits,
-                readTimeoutMills);
-
-        if (worker_ptr->isOpened()) {
-            // 作为指向基类的指针
-            _mDevices[path] = std::move(worker_ptr);
-            return 0;
-        } else {
-            char ch[20];
-            char *path_char = strcpy(ch, path.c_str());
-            LOGE("open serial port [%s] fail！", path_char);
-            return -1;
-        }
-
-    }
-
-    int LSerialPortManager::addReadOnlyDevice(std::string &path, BaudRate &baudRate,
+    int LSerialPortManager::addReadOnlyDevice(std::string &path, int &baudRate,
                                               NumDataBits &dataBits, Parity &parity,
                                               NumStopBits &stopBits,
+                                              HardwareFlowControl &hwfc,
+                                              SoftwareFlowControl &swfc,
                                               int32_t &readIntervalTimeoutMills,
                                               long &checkIntervalWaitMills) {
         //检查串口是否存在
@@ -140,6 +103,8 @@ namespace LSerialPort {
                 dataBits,
                 parity,
                 stopBits,
+                hwfc,
+                swfc,
                 readIntervalTimeoutMills,
                 checkIntervalWaitMills);
 
@@ -155,9 +120,11 @@ namespace LSerialPort {
         }
     }
 
-    int LSerialPortManager::addWriteOnlyDevice(std::string &path, BaudRate &baudRate,
+    int LSerialPortManager::addWriteOnlyDevice(std::string &path, int &baudRate,
                                                NumDataBits &dataBits, Parity &parity,
                                                NumStopBits &stopBits,
+                                               HardwareFlowControl &hwfc,
+                                               SoftwareFlowControl &swfc,
                                                int32_t &readIntervalTimeoutMills) {
         //检查串口是否存在
         if (hasDevice(path)) {
@@ -183,6 +150,8 @@ namespace LSerialPort {
                 dataBits,
                 parity,
                 stopBits,
+                hwfc,
+                swfc,
                 readIntervalTimeoutMills);
 
         if (worker_ptr->isOpened()) {
@@ -200,10 +169,12 @@ namespace LSerialPort {
 
     int LSerialPortManager::addDevice(
             std::string &path,
-            BaudRate &baudRate,
+            int &baudRate,
             NumDataBits &dataBits,
             Parity &parity,
             NumStopBits &stopBits,
+            HardwareFlowControl &hwfc,
+            SoftwareFlowControl &swfc,
             int32_t &readIntervalTimeoutMills,
             long &checkIntervalWaitMills) {
         //检查串口是否存在
@@ -236,6 +207,8 @@ namespace LSerialPort {
                 dataBits,
                 parity,
                 stopBits,
+                hwfc,
+                swfc,
                 readIntervalTimeoutMills,
                 checkIntervalWaitMills);
 

@@ -33,10 +33,12 @@ namespace LSerialPort {
          */
         ReadWorker(
                 const std::string &path,
-                BaudRate &baudRate,
+                int &baudRate,
                 NumDataBits &dataBits,
                 Parity &parity,
                 NumStopBits &stopBits,
+                HardwareFlowControl &hwfc,
+                SoftwareFlowControl &swfc,
                 int32_t &readIntervalTimeoutMills,
                 long &checkIntervalWaitMills);
 

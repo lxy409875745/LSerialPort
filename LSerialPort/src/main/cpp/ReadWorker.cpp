@@ -7,14 +7,23 @@ namespace LSerialPort {
 
     ReadWorker::ReadWorker(
             const std::string &path,
-            BaudRate &baudRate,
+            int &baudRate,
             NumDataBits &dataBits,
             Parity &parity,
             NumStopBits &stopBits,
+            HardwareFlowControl &hwfc,
+            SoftwareFlowControl &swfc,
             int32_t &readIntervalTimeoutMills,
             long &checkIntervalWaitMills) {
 
-        _serialPort = new SerialPort(path, baudRate, dataBits, parity, stopBits);
+        _serialPort = new SerialPort(path,
+                                     BaudRate::B_CUSTOM,
+                                     dataBits,
+                                     parity,
+                                     stopBits,
+                                     hwfc,
+                                     swfc);
+        _serialPort->SetBaudRate(baudRate);
         //设置读取超时时间 这个参数慢慢调看效果 取值范围 -1 ~ 25500   -1表示无限超时等待 直到有数据返回，0标识表示立即返回任何数据，>0则等待x毫秒后会取消阻塞
         _serialPort->SetTimeout(readIntervalTimeoutMills);
         _serialPort->Open();

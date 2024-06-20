@@ -16,6 +16,10 @@ abstract class BaseSerialPortClient constructor(
     open val parity: Int,
     //起始位
     open val stopBits: Int,
+    //硬件流控
+    open val hardwareFlowControl: Int,
+    //软件流控
+    open val softwareFlowControl: Int,
 ) {
     companion object {
         //默认参数
@@ -23,6 +27,8 @@ abstract class BaseSerialPortClient constructor(
         internal const val DEF_DATABITS = DataBits.EIGHT
         internal const val DEF_PARITY = Parity.NONE
         internal const val DEF_STOPBITS = StopBits.ONE
+        internal const val DEF_HARDWARE_FLOW_CONTROL = HardwareFlowControl.OFF
+        internal const val DEF_SOFTWARE_FLOW_CONTROL = SoftwareFlowControl.OFF
     }
 
     /**

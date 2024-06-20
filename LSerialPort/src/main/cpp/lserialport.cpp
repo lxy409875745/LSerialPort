@@ -33,48 +33,26 @@ Java_com_redrackham_LSerialPortJNI_native_1openSyncSerialPort(JNIEnv *env, jobje
                                                               jstring path, jint baudrate,
                                                               jint data_bits, jint parity,
                                                               jint stop_bits,
+                                                              jint hardware_flow_control,
+                                                              jint software_flow_control,
                                                               jint read_timeout_mills) {
     const char *path_char = env->GetStringUTFChars(path, nullptr);
     auto path_str = std::string(path_char);
-    BaudRate br = convertBaudRate(baudrate);
+    int br = baudrate;
     NumDataBits db = convertDataBits(data_bits);
     Parity p = convertParity(parity);
     NumStopBits sb = convertStopBits(stop_bits);
+    HardwareFlowControl hwfc = convertHardwareFlowControl(hardware_flow_control);
+    SoftwareFlowControl swfc = convertSoftwareFlowControl(software_flow_control);
     //jint转int32_t
     auto rtm_32 = static_cast<int32_t>(read_timeout_mills);
     long worker_ptr_jlong = mLSerialPortManager->buildSyncReadWriteDevice(path_str, br, db, p, sb,
+                                                                          hwfc, swfc,
                                                                           rtm_32);
     //释放资源
     env->ReleaseStringUTFChars(path, path_char);
     return worker_ptr_jlong;
 }
-
-extern "C"
-JNIEXPORT jint JNICALL
-Java_com_redrackham_LSerialPortJNI_native_1openSerialPortReadOnly(JNIEnv *env, jobject thiz,
-                                                                  jstring path, jint baudrate,
-                                                                  jint data_bits, jint parity,
-                                                                  jint stop_bits,
-                                                                  jint check_interval_wait_mills) {
-    const char *path_char = env->GetStringUTFChars(path, nullptr);
-    auto path_str = std::string(path_char);
-    BaudRate br = convertBaudRate(baudrate);
-    NumDataBits db = convertDataBits(data_bits);
-    Parity p = convertParity(parity);
-    NumStopBits sb = convertStopBits(stop_bits);
-
-    //这里read_interval_timeout_mills设置为0，因为使用独立线程去检查。不需要配置等待时间了
-    int32_t rtm_32 = 0;
-
-    //jlong转为long
-    long ctm_l = static_cast<long>(check_interval_wait_mills);
-    int result = mLSerialPortManager->addReadOnlyDevice(path_str, br, db, p, sb, rtm_32, ctm_l);
-    //释放资源
-    env->ReleaseStringUTFChars(path, path_char);
-    return result;
-}
-
-
 
 
 extern "C"
@@ -82,16 +60,52 @@ JNIEXPORT jint JNICALL
 Java_com_redrackham_LSerialPortJNI_native_1openSerialPortWriteOnly(JNIEnv *env, jobject thiz,
                                                                    jstring path, jint baudrate,
                                                                    jint data_bits, jint parity,
-                                                                   jint stop_bits) {
+                                                                   jint stop_bits,
+                                                                   jint hardware_flow_control,
+                                                                   jint software_flow_control) {
     const char *path_char = env->GetStringUTFChars(path, nullptr);
     auto path_str = std::string(path_char);
-    BaudRate br = convertBaudRate(baudrate);
+    int br = baudrate;
     NumDataBits db = convertDataBits(data_bits);
     Parity p = convertParity(parity);
     NumStopBits sb = convertStopBits(stop_bits);
+    HardwareFlowControl hwfc = convertHardwareFlowControl(hardware_flow_control);
+    SoftwareFlowControl swfc = convertSoftwareFlowControl(software_flow_control);
     //这里read_interval_timeout_mills设置为0，因为使用独立线程去检查。不需要配置等待时间了
     int32_t rtm_32 = 0;
-    int result = mLSerialPortManager->addWriteOnlyDevice(path_str, br, db, p, sb, rtm_32);
+    int result = mLSerialPortManager->addWriteOnlyDevice(path_str, br, db, p, sb, hwfc, swfc,
+                                                         rtm_32);
+    //释放资源
+    env->ReleaseStringUTFChars(path, path_char);
+    return result;
+}
+
+
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_redrackham_LSerialPortJNI_native_1openSerialPortReadOnly(JNIEnv *env, jobject thiz,
+                                                                  jstring path, jint baudrate,
+                                                                  jint data_bits, jint parity,
+                                                                  jint stop_bits,
+                                                                  jint hardware_flow_control,
+                                                                  jint software_flow_control,
+                                                                  jint check_interval_wait_mills) {
+    const char *path_char = env->GetStringUTFChars(path, nullptr);
+    auto path_str = std::string(path_char);
+    int br = baudrate;
+    NumDataBits db = convertDataBits(data_bits);
+    Parity p = convertParity(parity);
+    NumStopBits sb = convertStopBits(stop_bits);
+    HardwareFlowControl hwfc = convertHardwareFlowControl(hardware_flow_control);
+    SoftwareFlowControl swfc = convertSoftwareFlowControl(software_flow_control);
+    //这里read_interval_timeout_mills设置为0，因为使用独立线程去检查。不需要配置等待时间了
+    int32_t rtm_32 = 0;
+
+    //jlong转为long
+    long ctm_l = static_cast<long>(check_interval_wait_mills);
+    int result = mLSerialPortManager->addReadOnlyDevice(path_str, br, db, p, sb, hwfc, swfc, rtm_32,
+                                                        ctm_l);
     //释放资源
     env->ReleaseStringUTFChars(path, path_char);
     return result;
@@ -103,22 +117,24 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_redrackham_LSerialPortJNI_native_1openSerialPort(JNIEnv *env, jobject thiz, jstring path,
                                                           jint baudrate, jint data_bits,
-                                                          jint parity,
-                                                          jint stop_bits,
+                                                          jint parity, jint stop_bits,
+                                                          jint hardware_flow_control,
+                                                          jint software_flow_control,
                                                           jint check_interval_wait_mills) {
     const char *path_char = env->GetStringUTFChars(path, nullptr);
     auto path_str = std::string(path_char);
-    BaudRate br = convertBaudRate(baudrate);
+    int br = baudrate;
     NumDataBits db = convertDataBits(data_bits);
     Parity p = convertParity(parity);
     NumStopBits sb = convertStopBits(stop_bits);
-
+    HardwareFlowControl hwfc = convertHardwareFlowControl(hardware_flow_control);
+    SoftwareFlowControl swfc = convertSoftwareFlowControl(software_flow_control);
     //这里read_interval_timeout_mills设置为0，因为使用独立线程去检查。不需要配置等待时间了
     int32_t rtm_32 = 0;
 
     //jlong转为long
     long ctm_l = static_cast<long>(check_interval_wait_mills);
-    int result = mLSerialPortManager->addDevice(path_str, br, db, p, sb, rtm_32, ctm_l);
+    int result = mLSerialPortManager->addDevice(path_str, br, db, p, sb, hwfc, swfc, rtm_32, ctm_l);
     //释放资源
     env->ReleaseStringUTFChars(path, path_char);
     return result;
@@ -253,13 +269,14 @@ Java_com_redrackham_LSerialPortJNI_native_1syncDataAvailable(JNIEnv *env, jobjec
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_redrackham_LSerialPortJNI_native_1closeSyncSerialPort(JNIEnv *env, jobject thiz,
-                                                               jstring path) {
+        Java_com_redrackham_LSerialPortJNI_native_1closeSyncSerialPort(JNIEnv *env, jobject thiz,
+jstring path) {
 
-    const char *path_char = env->GetStringUTFChars(path, nullptr);
-    auto path_str = std::string(path_char);
-    int result = mLSerialPortManager->removeDevice(path_str);
-    //释放资源
-    env->ReleaseStringUTFChars(path, path_char);
-    return result;
+const char *path_char = env->GetStringUTFChars(path, nullptr);
+auto path_str = std::string(path_char);
+int result = mLSerialPortManager->removeDevice(path_str);
+//释放资源
+env->ReleaseStringUTFChars(path, path_char);
+return result;
 }
+

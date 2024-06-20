@@ -4,6 +4,42 @@ import androidx.annotation.IntDef
 
 
 /**
+ * 软件流控 (XON/XOF)
+ * OFF:关闭
+ * ON:开启
+ */
+@Retention(AnnotationRetention.SOURCE)
+@IntDef(
+    SoftwareFlowControl.OFF,
+    SoftwareFlowControl.ON,
+)
+annotation class SoftwareFlowControl {
+    companion object {
+        const val OFF = 0 //关闭
+        const val ON = 1//开启
+    }
+}
+
+
+/**
+ * 硬件流控 (RTS/CTS)
+ * OFF:关闭
+ * ON:开启
+ */
+@Retention(AnnotationRetention.SOURCE)
+@IntDef(
+    HardwareFlowControl.OFF,
+    HardwareFlowControl.ON,
+)
+annotation class HardwareFlowControl {
+    companion object {
+        const val OFF = 0 //关闭
+        const val ON = 1//开启
+    }
+}
+
+
+/**
  * 多线程客户端类型
  * READ_WRITE: 读写
  * ONLY_READ: 只读

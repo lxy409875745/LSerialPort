@@ -11,12 +11,12 @@ using namespace mn::CppLinuxSerial;
 namespace LSerialPort {
 
 
-/**
- * jbyteArray转vector<uint8_t>
- * @param env
- * @param bytearray
- * @return
- */
+    /**
+     * jbyteArray转vector<uint8_t>
+     * @param env
+     * @param bytearray
+     * @return
+     */
     inline std::vector<uint8_t>
     convertJByteArrayToVectorU8(JNIEnv * env, jbyteArray & jbytearray) {
         std::vector<uint8_t> vec;
@@ -28,11 +28,59 @@ namespace LSerialPort {
         return vec;
     }
 
-/**
-* 停止位转换
-* @param stopBits
-* @return
-*/
+    /**
+     * 软件流控转换
+     * @param softwareFlowControl
+     * @return
+     */
+    inline SoftwareFlowControl convertSoftwareFlowControl(const int &softwareFlowControl) {
+        SoftwareFlowControl swfc;
+        switch (softwareFlowControl) {
+            case 0: {
+                swfc = SoftwareFlowControl::OFF;
+                break;
+            }
+            case 1: {
+                swfc = SoftwareFlowControl::ON;
+                break;
+            }
+            default: {
+                THROW_EXCEPT("HardwareFlowControl value not supported!");
+            }
+        }
+        return swfc;
+    }
+
+
+    /**
+     * 硬件流控转换
+     * @param hardwareFlowControl
+     * @return
+     */
+    inline HardwareFlowControl convertHardwareFlowControl(const int &hardwareFlowControl) {
+        HardwareFlowControl hwfc;
+        switch (hardwareFlowControl) {
+            case 0: {
+                hwfc = HardwareFlowControl::OFF;
+                break;
+            }
+            case 1: {
+                hwfc = HardwareFlowControl::ON;
+                break;
+            }
+            default: {
+                THROW_EXCEPT("HardwareFlowControl value not supported!");
+            }
+        }
+        return hwfc;
+    }
+
+
+    /**
+     * 停止位转换
+     * @param stopBits
+     * @return
+     */
     inline NumStopBits convertStopBits(const int &stopBits) {
         NumStopBits sb;
         switch (stopBits) {
@@ -52,11 +100,11 @@ namespace LSerialPort {
     }
 
 
-/**
- * 校验位转换
- * @param parity 0:无校验位(NONE，默认)；1:奇校验位(ODD);2:偶校验位(EVEN)
- * @return
- */
+    /**
+     * 校验位转换
+     * @param parity 0:无校验位(NONE，默认)；1:奇校验位(ODD);2:偶校验位(EVEN)
+     * @return
+     */
     inline Parity convertParity(const int &parity) {
 
         Parity p;
@@ -82,11 +130,11 @@ namespace LSerialPort {
     }
 
 
-/**
- * 数据位
- * @param dataBits 数据位 5-8
- * @return
- */
+    /**
+     * 数据位
+     * @param dataBits 数据位 5-8
+     * @return
+     */
     inline NumDataBits convertDataBits(const int &dataBits) {
         NumDataBits db;
         switch (dataBits) {
@@ -111,103 +159,6 @@ namespace LSerialPort {
             }
         }
         return db;
-    }
-
-
-/**
- * 波特率转换
- * @param baudRate 波特率 0-460800
- * @return SerialPort的枚举类型
- */
-    inline BaudRate convertBaudRate(const int &baudRate) {
-        BaudRate br;
-        switch (baudRate) {
-            case 0: {
-                br = BaudRate::B_0;
-                break;
-            }
-            case 50: {
-                br = BaudRate::B_50;
-                break;
-            }
-            case 75: {
-                br = BaudRate::B_75;
-                break;
-            }
-            case 110: {
-                br = BaudRate::B_110;
-                break;
-            }
-            case 134: {
-                br = BaudRate::B_134;
-                break;
-            }
-            case 150: {
-                br = BaudRate::B_150;
-                break;
-            }
-            case 200: {
-                br = BaudRate::B_200;
-                break;
-            }
-            case 300: {
-                br = BaudRate::B_300;
-                break;
-            }
-            case 600: {
-                br = BaudRate::B_600;
-                break;
-            }
-            case 1200: {
-                br = BaudRate::B_200;
-                break;
-            }
-            case 1800: {
-                br = BaudRate::B_1800;
-                break;
-            }
-            case 2400: {
-                br = BaudRate::B_2400;
-                break;
-            }
-            case 4800: {
-                br = BaudRate::B_4800;
-                break;
-            }
-            case 9600: {
-                br = BaudRate::B_9600;
-                break;
-            }
-            case 19200: {
-                br = BaudRate::B_19200;
-                break;
-            }
-            case 38400: {
-                br = BaudRate::B_38400;
-                break;
-            }
-            case 57600: {
-                br = BaudRate::B_57600;
-                break;
-            }
-            case 115200: {
-                br = BaudRate::B_115200;
-                break;
-            }
-            case 230400: {
-                br = BaudRate::B_230400;
-                break;
-            }
-            case 460800: {
-                br = BaudRate::B_460800;
-                break;
-            }
-            default : {
-                THROW_EXCEPT("BaudRate value not supported!")
-            }
-        }
-
-        return br;
     }
 
 

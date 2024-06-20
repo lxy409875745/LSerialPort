@@ -22,12 +22,13 @@
 
     <Spinner
         android:id="@+id/sp_path"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="40dp"
+        app:layout_constraintBottom_toBottomOf="@+id/cb_hwFlowControl"
         app:layout_constraintEnd_toStartOf="@+id/tv_baudrate"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/tv_path"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/cb_hwFlowControl" />
 
 
     <TextView
@@ -45,17 +46,37 @@
 
     <Spinner
         android:id="@+id/sp_baudrate"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/sp_path"
+        app:layout_constraintEnd_toStartOf="@+id/cb_hwFlowControl"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/tv_baudrate"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/sp_path" />
 
+    <CheckBox
+        android:id="@+id/cb_hwFlowControl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="硬件流控 (RTS/CTS)"
+        app:layout_constraintBottom_toTopOf="@+id/sp_databits"
+        app:layout_constraintEnd_toStartOf="@+id/cb_swFlowControl"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/sp_baudrate" />
+
+    <CheckBox
+        android:id="@+id/cb_swFlowControl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="软件流控 (XON/XOF)"
+
+        app:layout_constraintBottom_toBottomOf="@+id/cb_hwFlowControl"
+        app:layout_constraintStart_toEndOf="@+id/cb_hwFlowControl"
+        app:layout_constraintTop_toTopOf="@+id/cb_hwFlowControl" />
 
     <TextView
         android:id="@+id/tv_databits"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="数据位："
         android:textColor="@color/black"
@@ -68,18 +89,17 @@
 
     <Spinner
         android:id="@+id/sp_databits"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_marginTop="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/switch_serialPort"
         app:layout_constraintEnd_toStartOf="@+id/tv_parity"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/tv_databits"
-        app:layout_constraintTop_toBottomOf="@+id/sp_path" />
+        app:layout_constraintStart_toEndOf="@+id/tv_databits" />
 
 
     <TextView
         android:id="@+id/tv_parity"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="校验位："
         android:textColor="@color/black"
@@ -92,7 +112,7 @@
 
     <Spinner
         android:id="@+id/sp_parity"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="40dp"
         app:layout_constraintBottom_toBottomOf="@+id/sp_databits"
         app:layout_constraintEnd_toStartOf="@+id/tv_stopbits"
@@ -102,7 +122,7 @@
 
     <TextView
         android:id="@+id/tv_stopbits"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="停止位："
         android:textColor="@color/black"
@@ -117,10 +137,7 @@
         android:id="@+id/sp_stopbits"
         android:layout_width="0dp"
         android:layout_height="40dp"
-
         app:layout_constraintBottom_toBottomOf="@+id/sp_parity"
-        app:layout_constraintEnd_toEndOf="parent"
-
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/tv_stopbits"
         app:layout_constraintTop_toTopOf="@+id/sp_parity" />
@@ -129,12 +146,12 @@
         android:id="@+id/scrollview_log"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="10dp"
         android:background="#eeeeee"
         android:fadeScrollbars="false"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/btn_open"
-        app:layout_constraintTop_toBottomOf="@+id/sp_databits"
+
+        app:layout_constraintBottom_toTopOf="@+id/cb_hwFlowControl"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         tools:layout_editor_absoluteX="0dp">
 
@@ -155,47 +172,31 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btn_sendMsg"
-
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_open" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 
-    <Button
-        android:id="@+id/btn_open"
-        android:layout_width="0dp"
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_serialPort"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="打开串口"
         app:layout_constraintBottom_toTopOf="@+id/edt_msg"
-        app:layout_constraintEnd_toStartOf="@+id/btn_close"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scrollview_log" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-
-    <Button
-        android:id="@+id/btn_close"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:text="关闭串口"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_open"
-        app:layout_constraintEnd_toStartOf="@+id/btn_cleanLog"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btn_open"
-        app:layout_constraintTop_toTopOf="@+id/btn_open" />
 
     <Button
         android:id="@+id/btn_cleanLog"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="20dp"
         android:text="清空日志"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_close"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btn_close"
-        app:layout_constraintTop_toTopOf="@+id/btn_close" />
+        app:layout_constraintStart_toEndOf="@+id/btn_sendMsg"
+        app:layout_constraintTop_toTopOf="@+id/btn_sendMsg" />
 
     <Button
         android:id="@+id/btn_sendMsg"
@@ -204,7 +205,7 @@
         android:layout_marginStart="10dp"
         android:text="发送"
         app:layout_constraintBottom_toBottomOf="@+id/edt_msg"
-        app:layout_constraintEnd_toEndOf="parent"
+
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/edt_msg" />
 
