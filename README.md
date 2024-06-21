@@ -59,11 +59,11 @@ val simpleClient = LSerialPortClient.Builder("/dev/ttysWK0").build()
 
 //当然，你可以通过建造类类自由的配置各种参数
 val customClient = LSerialPortClient.Builder("/dev/ttysWK0")
-    .baudrate(BaudRate.B_115200)//波特率（固定常数）
+    .baudrate(BaudRate.B_115200)//波特率（固定常数 默认9600）
     .baudrate_custom(9600)//波特率（自定义）
-    .dataBits(DataBits.EIGHT)//数据位
-    .parity(Parity.NONE)//校验位
-    .stopBits(StopBits.ONE)//停止位
+    .dataBits(DataBits.EIGHT)//数据位（默认8）
+    .parity(Parity.NONE)//校验位（默认NONE）
+    .stopBits(StopBits.ONE)//停止位（默认1）
     .hardwareFlowControl(HardwareFlowControl.OFF)//硬件流控 (RTS/CTS) 默认关闭
     .softwareFlowControl(SoftwareFlowControl.OFF)//软件流控 (XON/XOF) 默认关闭
     .checkIntervalWaitMills(0)//循环查询间隔等待时间，等待时间越长一次返回数据量越多，单位：ms
@@ -124,11 +124,11 @@ LSerialPort同时也提供了同步操作串口的类[LSerialPortSyncClient](htt
 ```kotlin
 //创建clientBuilder，该client操作串口：ttysWK0。通过建造者我们可以选择定制参数
 val client = LSerialPortSyncClient.Builder("/dev/ttysWK0")
-    .baudrate(BaudRate.B_115200)//波特率
+    .baudrate(BaudRate.B_115200)//波特率（固定常数 默认9600）
     .baudrate_custom(9600)//波特率（自定义）
-    .dataBits(DataBits.EIGHT)//数据位
-    .parity(Parity.NONE)//校验位
-    .stopBits(StopBits.ONE)//停止位
+    .dataBits(DataBits.EIGHT)//数据位（默认8）
+    .parity(Parity.NONE)//校验位（默认NONE）
+    .stopBits(StopBits.ONE)//停止位（默认1）
     .hardwareFlowControl(HardwareFlowControl.OFF)//硬件流控 (RTS/CTS) 默认关闭
     .softwareFlowControl(SoftwareFlowControl.OFF)//软件流控 (XON/XOF) 默认关闭
     //读取数据超时时间，当传入
