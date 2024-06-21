@@ -2,33 +2,35 @@
 
 *   \[项目地址] <https://github.com/RedRackham-R/LSerialPort>)
 
-该库采用C++实现异步线程读写串口。上层使用无需过多关心异步线程读写问题。<br><br>
-同时也支持同步阻塞式读写串口。<br>
+该库采用C++实现底层异步线程读写串口上层使用无需过多关心异步线程读写问题。<br>
+同时也提供同步阻塞式读写串口。<br>
 
-<img width="480" alt="12e2d4e30b495362d7ffaf3a1b63719" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8962cb0e03b74b6da38d743405cdd77d~tplv-k3u1fbpfcp-watermark.image?">
+支持波特率、数据位、校验位、停止位以及流控配置。
+
+<img width="580" alt="12e2d4e30b495362d7ffaf3a1b63719" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8ebf77d7edb74cf887153ae31ad7f8ef~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=2545&h=1434&s=359081&e=png&b=f1f1f1">
 <br>
 
 [下载demo](https://github.com/RedRackham-R/LSerialPort/releases)
-（平台：arm64-v8a、armeabi-v7a、x86_64）
+（平台：arm64-v8a、armeabi-v7a、x86\_64）
 
 # 框架引入
 
 目前工程已经上传至Maven Central，可以直接通过依赖方式引入。
 
-## maven central引入<br>
+## maven central引入（--推荐--）<br>
 
 **Module:build.gradle**
 
 ```kotlin
 dependencies {
     ...
-    implementation("io.github.RedRackham-R:LSerialPort:2.0.3-beta")
+    implementation("io.github.RedRackham-R:LSerialPort:2.0.3-beta2")
 }
 ```
 
 ## aar包引入<br>
 
-1.  下载 [AAR包](https://github.com/RedRackham-R/LSerialPort/releases)放入工程内libs目录下<br> <img width="309" alt="d1bd64379531d24b56db04b24a30bc9" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b8d78c7ef78c4b19ba95e430adb36d59~tplv-k3u1fbpfcp-watermark.image?">
+1.  下载 [AAR包](https://github.com/RedRackham-R/LSerialPort/releases)放入工程内libs目录下<br> <img width="309" alt="d1bd64379531d24b56db04b24a30bc9" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b8d78c7ef78c4b19ba95e430adb36d59~tplv-k3u1fbpfcp-watermark.image#?w=618&#x26;h=638&#x26;s=24117&#x26;e=png&#x26;b=3c3f41">
 
 2.  在build.gradle中dependencies内添加引用声明
 
@@ -36,13 +38,11 @@ dependencies {
 implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
 ```
 
-<img width="488" alt="12fde479a9d566889521909bd8f4d10" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d989a028987b4ae08a3af511447d7292~tplv-k3u1fbpfcp-watermark.image?">
+<img width="488" alt="12fde479a9d566889521909bd8f4d10" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d989a028987b4ae08a3af511447d7292~tplv-k3u1fbpfcp-watermark.image#?w=976&#x26;h=360&#x26;s=46465&#x26;e=png&#x26;b=2b2b2b">
 
 <br><br>
 
 # 开始使用
-
-
 
 > 注意！ 该文档更新于2023年05月11日，当前文档使用版本为【**v2**】。如果查看旧版v1文档请看这里：[V1 文档](https://github.com/RedRackham-R/LSerialPort/blob/v1/README.md)
 
@@ -59,10 +59,13 @@ val simpleClient = LSerialPortClient.Builder("/dev/ttysWK0").build()
 
 //当然，你可以通过建造类类自由的配置各种参数
 val customClient = LSerialPortClient.Builder("/dev/ttysWK0")
-    .baudrate(BaudRate.B_115200)//波特率
+    .baudrate(BaudRate.B_115200)//波特率（固定常数）
+    .baudrate_custom(9600)//波特率（自定义）
     .dataBits(DataBits.EIGHT)//数据位
     .parity(Parity.NONE)//校验位
     .stopBits(StopBits.ONE)//停止位
+    .hardwareFlowControl(HardwareFlowControl.OFF)//硬件流控 (RTS/CTS) 默认关闭
+    .softwareFlowControl(SoftwareFlowControl.OFF)//软件流控 (XON/XOF) 默认关闭
     .checkIntervalWaitMills(0)//循环查询间隔等待时间，等待时间越长一次返回数据量越多，单位：ms
     .build()
     
@@ -122,9 +125,12 @@ LSerialPort同时也提供了同步操作串口的类[LSerialPortSyncClient](htt
 //创建clientBuilder，该client操作串口：ttysWK0。通过建造者我们可以选择定制参数
 val client = LSerialPortSyncClient.Builder("/dev/ttysWK0")
     .baudrate(BaudRate.B_115200)//波特率
+    .baudrate_custom(9600)//波特率（自定义）
     .dataBits(DataBits.EIGHT)//数据位
     .parity(Parity.NONE)//校验位
     .stopBits(StopBits.ONE)//停止位
+    .hardwareFlowControl(HardwareFlowControl.OFF)//硬件流控 (RTS/CTS) 默认关闭
+    .softwareFlowControl(SoftwareFlowControl.OFF)//软件流控 (XON/XOF) 默认关闭
     //读取数据超时时间，当传入
     //   -1:一直阻塞线程等待返回
     //    0:无论有没有数据，立即返回。如果没有数据，则返回一个空的byte数组
@@ -180,17 +186,16 @@ if(result == 0){
 
 NDK ：23.1.7779620 <br>
 C++ ：17 <br>
-Android Gradle Plugin ：7.4.1<br>
-Gradle ：7.5 <br>
-Android Studio ：Android Studio Electric Eel | 2022.1.1 Patch 1 <br><br>
+Gradle ：8.4 <br>
+Android Studio Jellyfish | 2023.3.1 <br><br>
 
 # 编译工程生成AAR
 
-1.  导入工程配置后选择Android Studio 中的build -> Refresh Linked C++ Projects 等待Gradle build完成。<br> <img width="340" alt="63f048d3450c8e4f3a9e3f12ffdf325" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9f77cbdfb78648deb638b2387dc2e484~tplv-k3u1fbpfcp-watermark.image?">
+1.  导入工程配置后选择Android Studio 中的build -> Refresh Linked C++ Projects 等待Gradle build完成。<br> <img width="340" alt="63f048d3450c8e4f3a9e3f12ffdf325" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9f77cbdfb78648deb638b2387dc2e484~tplv-k3u1fbpfcp-watermark.image#?w=739&#x26;h=607&#x26;s=45018&#x26;e=png&#x26;b=3c3f41">
 
-2.  Gradle build完成后选择Rebuild Project 等待Gradle build完成。<br> <img width="340" alt="323f9c45804d06a432885f14fbbfb9c" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e523ff583af84dc698c39cb16e255fe9~tplv-k3u1fbpfcp-watermark.image?">
+2.  Gradle build完成后选择Rebuild Project 等待Gradle build完成。<br> <img width="340" alt="323f9c45804d06a432885f14fbbfb9c" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e523ff583af84dc698c39cb16e255fe9~tplv-k3u1fbpfcp-watermark.image#?w=738&#x26;h=594&#x26;s=43683&#x26;e=png&#x26;b=3c3f41">
 
-3.  完成后在LSerialPort/build/outputs/aar/目录下会看到LSerialPort-debug.aar文件<br> <img width="340" alt="f8eb60ecd662347259874a816ec7a11" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ce8a8dda2428475e9ef071b28c1dac03~tplv-k3u1fbpfcp-watermark.image?">
+3.  完成后在LSerialPort/build/outputs/aar/目录下会看到LSerialPort-debug.aar文件<br> <img width="340" alt="f8eb60ecd662347259874a816ec7a11" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ce8a8dda2428475e9ef071b28c1dac03~tplv-k3u1fbpfcp-watermark.image#?w=620&#x26;h=794&#x26;s=32787&#x26;e=png&#x26;b=3d4043">
 
 <br>
 
@@ -202,31 +207,31 @@ Android Studio ：Android Studio Electric Eel | 2022.1.1 Patch 1 <br><br>
 
     package:mine level:error LSerialPortLog
 
-<img width="500" alt="2a4f6285874dfb001cb817e97924afc" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/92ba70b5b2864402a6ef2d1dac39225b~tplv-k3u1fbpfcp-watermark.image?">
+<img width="500" alt="2a4f6285874dfb001cb817e97924afc" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/92ba70b5b2864402a6ef2d1dac39225b~tplv-k3u1fbpfcp-watermark.image#?w=1866&#x26;h=1033&#x26;s=245505&#x26;e=png&#x26;b=2b2b2b">
 
 ### 2. 新版Studio怎么下载某个版本的NDK or 新版的SDK Manager找不到想要的NDK版本
 
-首先，打开Studio的Tools -> SDK Manage <br><br> <img width="360" alt="a9b279b844028fea09238cca48c5a37" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2cefd64ca7d2474e935327fa9cddca96~tplv-k3u1fbpfcp-watermark.image?">
+首先，打开Studio的Tools -> SDK Manage <br><br> <img width="360" alt="a9b279b844028fea09238cca48c5a37" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2cefd64ca7d2474e935327fa9cddca96~tplv-k3u1fbpfcp-watermark.image#?w=559&#x26;h=613&#x26;s=38221&#x26;e=png&#x26;b=3c3f41">
 
-然后，打开页面后先选择 SDK Tools选项 <br><br> <img width="500" alt="d1fc5f8b0dfeb715c1390a92b00ba4c" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dc096401dff0410ba4ce8f248ccf7c4a~tplv-k3u1fbpfcp-watermark.image?">
+然后，打开页面后先选择 SDK Tools选项 <br><br> <img width="500" alt="d1fc5f8b0dfeb715c1390a92b00ba4c" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dc096401dff0410ba4ce8f248ccf7c4a~tplv-k3u1fbpfcp-watermark.image#?w=985&#x26;h=583&#x26;s=57503&#x26;e=png&#x26;b=3d4144">
 
-最后，勾选Show Package Details选项即可下载想要版本的NDK <br><br> <img width="500" alt="2f577bfdcdda4fd5b73c2d3eb7f6613" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/cd1c110081504238bd0d87b4c96e5c37~tplv-k3u1fbpfcp-watermark.image?">
+最后，勾选Show Package Details选项即可下载想要版本的NDK <br><br> <img width="500" alt="2f577bfdcdda4fd5b73c2d3eb7f6613" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/cd1c110081504238bd0d87b4c96e5c37~tplv-k3u1fbpfcp-watermark.image#?w=989&#x26;h=582&#x26;s=53091&#x26;e=png&#x26;b=3d4144">
 
 ### 3. 想要打包运行其他架构的包。如x86平台
 
-打开LSerialPort库的Modele Gradle，在NDK内填写需要的架构，如下图内的x86 <br><br> <img width="450" alt="07c2b43ad86f7ff01ed7dcfbeecd138" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c1f0aa9b9caa4ecca73b951980e4d71a~tplv-k3u1fbpfcp-watermark.image?">
+打开LSerialPort库的Modele Gradle，在NDK内填写需要的架构，如下图内的x86 <br><br> <img width="450" alt="07c2b43ad86f7ff01ed7dcfbeecd138" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c1f0aa9b9caa4ecca73b951980e4d71a~tplv-k3u1fbpfcp-watermark.image#?w=1198&#x26;h=1037&#x26;s=87256&#x26;e=png&#x26;b=2c2c2c">
 
-然后删除app以及LSerialPort中的build目录 <br><br> <img width="320" alt="cbf363f3ca6e83f9805f5d05fa1b52a" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5f4b194411464a44998b1c6c28c22d14~tplv-k3u1fbpfcp-watermark.image?">
+然后删除app以及LSerialPort中的build目录 <br><br> <img width="320" alt="cbf363f3ca6e83f9805f5d05fa1b52a" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5f4b194411464a44998b1c6c28c22d14~tplv-k3u1fbpfcp-watermark.image#?w=396&#x26;h=646&#x26;s=19908&#x26;e=png&#x26;b=3c3f41">
 
-最后重新编译生成AAR即可 <br><br> <img width="320" alt="cbf1a9173a7a205ca019501facc90ae" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/efd6f2131f8f41568afa8484f876eea0~tplv-k3u1fbpfcp-watermark.image?">
+最后重新编译生成AAR即可 <br><br> <img width="320" alt="cbf1a9173a7a205ca019501facc90ae" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/efd6f2131f8f41568afa8484f876eea0~tplv-k3u1fbpfcp-watermark.image#?w=490&#x26;h=326&#x26;s=10807&#x26;e=png&#x26;b=3d4042">
 
 ### 4. 想要打包release版本的AAR
 
-打开studio的Build Variants。app与LSerialPort都改为release后，创建release需要的签名文件并重新打包 <br> <img width="320" alt="da0c9bb910a2cb306095cfdd40447ee" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ebde69799b784f439b0a484439d32f75~tplv-k3u1fbpfcp-watermark.image?">
+打开studio的Build Variants。app与LSerialPort都改为release后，创建release需要的签名文件并重新打包 <br> <img width="320" alt="da0c9bb910a2cb306095cfdd40447ee" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ebde69799b784f439b0a484439d32f75~tplv-k3u1fbpfcp-watermark.image#?w=623&#x26;h=704&#x26;s=21250&#x26;e=png&#x26;b=3c4042">
 
 ### 5. 为什么有时候Refresh Linked C++ Projects以及Rebuild Project后没有AAR文件
 
-先把app以及LSerialPort目录下的build删除，然后重新Refresh Linked C++ Projects以及Rebuild Project，如果还是没有生成多rebuild几次 <br> <img width="320" alt="cbf363f3ca6e83f9805f5d05fa1b52a" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3ce577810dc04c22950541a0171a7d66~tplv-k3u1fbpfcp-watermark.image?"> <br>
+先把app以及LSerialPort目录下的build删除，然后重新Refresh Linked C++ Projects以及Rebuild Project，如果还是没有生成多rebuild几次 <br> <img width="320" alt="cbf363f3ca6e83f9805f5d05fa1b52a" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3ce577810dc04c22950541a0171a7d66~tplv-k3u1fbpfcp-watermark.image#?w=396&#x26;h=646&#x26;s=19908&#x26;e=png&#x26;b=3c3f41"> <br>
 
 # LSerialPort设计思路
 
